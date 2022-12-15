@@ -30,8 +30,8 @@ public class accountCommand implements CommandExecutor {
                                 player.sendMessage("check player name");
                                 return false;
                             }
-                            if (account.getBalance(player.getName()) - Integer.parseInt(args[2]) < 0) {
-                                player.sendMessage("you have no balance : (" + account.getBalance(player.getName()) + ")");
+                            if (!account.addBalance(player.getName(), account.getBalance(player.getName()) - Integer.parseInt(args[2]))) {
+                                player.sendMessage("you have no balance :( (" + account.getBalance(player.getName()) + ")");
                                 return false;
                             }
                             account.addBalance(player.getName(), -1 * Integer.parseInt(args[2]));
@@ -77,8 +77,11 @@ public class accountCommand implements CommandExecutor {
                         return false;
                     }
                     if (args.length == 3) {
-                        account.addBalance(args[1], Integer.parseInt(args[2]));
-                        sender.sendMessage("money add to " + args[1] + " | amount : " + Integer.parseInt(args[2]) + " | total : " + account.getBalance(args[1]));
+                        if (account.addBalance(args[1], Integer.parseInt(args[2]))) {
+                            sender.sendMessage("money add to " + args[1] + " | amount : " + Integer.parseInt(args[2]) + " | total : " + account.getBalance(args[1]));
+                        } else {
+                            sender.sendMessage("error");
+                        }
                     }
                     else Bukkit.dispatchCommand(sender, "account help");
                     break;

@@ -37,21 +37,20 @@ public class account {
         accountMap.put(playerName, balanceToSet);
     }
 
-    public void addBalance(String playerName, int balanceToAdd) {
+    public boolean addBalance(String playerName, int balanceToAdd) {
         if (plugin.moneyConfig.getConfig().get("account." + playerName + ".balance") != null) {
-            int balanceNow = getBalance(playerName);
-            if (balanceNow + balanceToAdd < 0) {
-                Bukkit.getPlayer(playerName).sendMessage("error : no minus balance!");
-                return;
+            if (getBalance(playerName) + balanceToAdd < 0) {
+                return false;
             }
-            setBalance(playerName, balanceNow + balanceToAdd);
+            setBalance(playerName, getBalance(playerName) + balanceToAdd);
             accountMap.remove(playerName);
-            accountMap.put(playerName, balanceNow + balanceToAdd);
+            accountMap.put(playerName, getBalance(playerName) + balanceToAdd);
         } else {
             setBalance(playerName, balanceToAdd);
             accountMap.remove(playerName);
             accountMap.put(playerName, balanceToAdd);
         }
+        return true;
     }
 
     public void printAllAccountData(CommandSender sender) {
