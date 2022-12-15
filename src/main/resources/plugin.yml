@@ -1,0 +1,3 @@
+name: Money
+version: '${project.version}'
+main: xyz.oreodev.money.Money
