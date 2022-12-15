@@ -1,12 +1,15 @@
 package xyz.oreodev.money;
 
+import org.bukkit.Bukkit;
+import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.HashMap;
+import java.util.Set;
 
 public class account {
     private Money plugin;
-    public HashMap<String, Integer> accountMap = new HashMap<>();
+    public static HashMap<String, Integer> accountMap = new HashMap<>();
 
     public account() {
         this.plugin = JavaPlugin.getPlugin(Money.class);
@@ -17,21 +20,45 @@ public class account {
         else return 0;
     }
 
+    public Set<String> getAccountList() {
+        return plugin.moneyConfig.getConfig().getConfigurationSection("account.").getKeys(false);
+    }
+
+    public void removeAccount(String playerName) {
+        plugin.moneyConfig.getConfig().set("account." + playerName, null);
+        plugin.moneyConfig.saveConfig();
+        accountMap.remove(playerName);
+    }
+
     public void setBalance(String playerName, int balanceToSet) {
         plugin.moneyConfig.getConfig().set("account." + playerName + ".balance", balanceToSet);
+        plugin.moneyConfig.saveConfig();
+        accountMap.remove(playerName);
+        accountMap.put(playerName, balanceToSet);
     }
 
     public void addBalance(String playerName, int balanceToAdd) {
         if (plugin.moneyConfig.getConfig().get("account." + playerName + ".balance") != null) {
-            int balanceNow = plugin.getConfig().getInt("account." + playerName + ".balance");
-            if (balanceNow - balanceToAdd < -1) {
-
+            int balanceNow = getBalance(playerName);
+            if (balanceNow + balanceToAdd < 0) {
+                Bukkit.getPlayer(playerName).sendMessage("error : no minus balance!");
                 return;
             }
+            setBalance(playerName, balanceNow + balanceToAdd);
+            accountMap.remove(playerName);
+            accountMap.put(playerName, balanceNow + balanceToAdd);
+        } else {
+            setBalance(playerName, balanceToAdd);
+            accountMap.remove(playerName);
+            accountMap.put(playerName, balanceToAdd);
         }
     }
 
-    public void initializeAccount() {
-        for (String name : plugin.moneyConfig.getConfig().getConfigurationSection("account.").getKeys(false));
+    public void printAllAccountData(CommandSender sender) {
+        sender.sendMessage("========================================");
+        for (String name : accountMap.keySet()) {
+            sender.sendMessage("account : " + name + " | balance : " + getBalance(name));
+        }
+        sender.sendMessage("========================================");
     }
 }
